@@ -10,8 +10,8 @@ from datetime import datetime
 dataName = 'msd_summary_file.h5'
 dataPath = '../' + dataName
 
-USER_NAME = 'ph2'
-PASSWD = 'Hp162162'
+USER_NAME = 'yw0'
+PASSWD = 'DBdb1234'
 HOST = 'oracle.cise.ufl.edu'
 PORT = '1521'
 SID = 'orcl'
@@ -54,7 +54,7 @@ def init():
     global providers, customers, genre_ids, singers
 
     h5 = GETTERS.open_h5_file_read(dataPath)
-    usernames = ['user' + str(i).zfill(4) for i in range(1000)]
+    usernames = ['user' + str(i).zfill(4) for i in range(hard.NUM_CUSTOMER)]
     passwd = '12345'
     street_opts = ['4000 SW' + str(i).zfill(3) for i in range(1, 101)]
     state_opts = [None, 'FL', 'CA', 'WA', 'AZ', 'NY']
@@ -421,10 +421,10 @@ def insert_singer():
 
     try:
         for i in range(hard.NUM_SINGERS):
-            __name = bytes2str(GETTERS.get_artist_name(h5, i))
-            if __name not in unique:
-                unique.add(__name)
-                __singer_id = bytes2str(GETTERS.get_artist_id(h5, i))
+            __singer_id = bytes2str(GETTERS.get_artist_id(h5, i))
+            if __singer_id not in unique:
+                unique.add(__singer_id)
+                __name = bytes2str(GETTERS.get_artist_name(h5, i))
                 __initial_hotness = 0
                 cursor.execute(sql.INSERT_SINGER,
                         id = __singer_id, name = __name,
@@ -475,7 +475,7 @@ def insert_favorite_singer():
             rows = 3
             unique = set()
             for i in range(rows):
-                index = InfoGenerator.gen_int(0, 99)
+                index = InfoGenerator.gen_int(0, len(songs) - 1)
                 __singer_id = bytes2str(GETTERS.get_artist_id(h5, index))
                 if __singer_id not in unique:
                     unique.add(__singer_id)
@@ -495,12 +495,15 @@ def insert_order():
     print('Inserting order tuples')
     conn = get_conn()
     cursor = get_cursor(conn)
+
     __customer = None
     __order_id = None
     __song_id = None
     __time = None
     __price = None
     __paid = None
+
+    unique = set()
 
     try:
         for i in range(hard.NUM_ORDER):
@@ -510,11 +513,19 @@ def insert_order():
             __song_id = songs[index_song].get_id()
             __price = songs[index_song].get_price()
             __time = datetime.now()
-            __paid = InfoGenerator.gen_int(0, 1)
+            __paid = 0
+            if __customer + __song_id not in unique:
+                unique.add(__customer + __song_id)
 
-            cursor.execute(sql.INSERT_ORDER,
-                    customer = __customer, order_id = __order_id, song_id = __song_id,
-                    time = __time, price = __price, paid = __paid)
+                cursor.execute(sql.INSERT_ORDER,
+                        customer = __customer, order_id = __order_id, song_id = __song_id,
+                        time = __time, price = __price, paid = __paid)
+
+                """generate a rate for each order"""
+                __score = InfoGenerator.gen_int(1, 5)
+
+                cursor.execute(sql.INSERT_RATE,
+                        score = __score, customer = __customer, song_id = __song_id)
         return 0
     except Exception as e:
         print(e, 'insert order tuple error')
@@ -525,32 +536,26 @@ def insert_order():
         conn.commit()
         close_all(conn, cursor)
 
-def insert_rate():
-    print('Inserting rate tuples')
-    conn = get_conn()
-    cursor = get_cursor(conn)
-
-    __customer = None
-    __song_id = None
-    __score = None
-
-    try:
-        for customer in customers.values():
-            index_song = InfoGenerator.gen_int(0, len(songs) - 1)
-            __customer = customer.get_username()
-            __song_id = songs[index_song].get_id()
-            __score = InfoGenerator.gen_int(0, 5)
-
-            cursor.execute(sql.INSERT_RATE,
-                    score = __score, customer = __customer, song_id = __song_id)
-        return 0
-    except Exception as e:
-        print(e, 'insert rate tuple error')
-        print('customer:',__customer, 'song_id:',__song_id, 'score:',__score)
-        return -1
-    finally:
-        conn.commit()
-        close_all(conn, cursor)
+# def insert_rate():
+#     print('Inserting rate tuples')
+#     conn = get_conn()
+#     cursor = get_cursor(conn)
+#
+#     __customer = None
+#     __song_id = None
+#     __score = None
+#
+#     try:
+#         for customer in customers.values():
+#             for i in range(hard.NUM_RATE):
+#         return 0
+#     except Exception as e:
+#         print(e, 'insert rate tuple error')
+#         print('customer:',__customer, 'song_id:',__song_id, 'score:',__score)
+#         return -1
+#     finally:
+#         conn.commit()
+#         close_all(conn, cursor)
 
 class InfoGenerator:
     @staticmethod
@@ -633,8 +638,8 @@ def insert_tuples():
     or insert_song()
     or insert_favorite_genre()
     or insert_favorite_singer()
-    or insert_order()
-    or insert_rate()):
+    or insert_order()):
+    # or insert_rate()):
         sys.exit(0)
 
 if __name__ == '__main__':

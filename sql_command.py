@@ -41,7 +41,7 @@ CREATE_GENRE_TABLE = """
 CREATE_SONG_TABLE = """
     create table SONG (
         id             varchar2(50),
-        title          varchar2(100) not null,
+        title          varchar2(300) not null,
         avg_rate       number(2,1) check(avg_rate >= 0 and avg_rate <= 5),
         release_date   number,
         duration       number,
@@ -57,7 +57,7 @@ CREATE_SONG_TABLE = """
 CREATE_SINGER_TABLE = """
     create table SINGER (
         id varchar2(50) not null,
-        name varchar2(50) not null,
+        name varchar2(300) not null,
         hotness number,
         primary key(id)
     )
