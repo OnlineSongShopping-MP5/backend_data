@@ -154,3 +154,44 @@ INSERT_RATE = """
     values (:score, :customer, :song_id)
 """
 
+
+""" TRIGGER """
+TRIGGER_DOWNLOAD = """
+    create or replace trigger adjust_download
+     after update of paid on orders
+     for each row
+    declare
+      prev_download number;
+      singer_download number;
+      singerid varchar2(20);
+    begin
+      select download into prev_download from song where song.id = :new.song_id;
+      select song.singer_id into singerid from song where song.id = :new.song_id;
+      select singer.hotness into singer_download from singer where singer.id = singerid;
+    
+      update song set song.download = prev_download + 1 where song.id = :new.song_id;
+      update singer set singer.hotness = singer_download + 1 where singer.id = singerid;
+    end;
+"""
+
+TRIGGER_AVG_RATE = """
+    create or replace trigger adjust_avg_rate
+     before insert on rate
+     for each row
+    declare
+      aver number(2, 1);
+      cnt number;
+      total number;
+    begin
+      select sum(score), count(*) into total, cnt from rate where song_id = :new.song_id;
+      if cnt != 0
+      then
+        aver := (total + :new.score) / (cnt + 1);
+        update song set song.avg_rate = aver where song.id = :new.song_id;
+        --dbms_output.put_line(aver);
+      else
+        update song set song.avg_rate = :new.score where song.id = :new.song_id;
+        --dbms_output.put_line(:new.score);
+      end if;
+    end;
+"""

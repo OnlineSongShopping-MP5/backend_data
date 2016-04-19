@@ -10,8 +10,8 @@ from datetime import datetime
 dataName = 'msd_summary_file.h5'
 dataPath = '../' + dataName
 
-USER_NAME = 'zjia'
-PASSWD = '1A2b3c4d!!'
+USER_NAME = 'yw0'
+PASSWD = 'DBdb1234'
 HOST = 'oracle.cise.ufl.edu'
 PORT = '1521'
 SID = 'orcl'
@@ -642,8 +642,26 @@ def insert_tuples():
     # or insert_rate()):
         sys.exit(0)
 
+def create_triggers():
+    print('Creating triggers')
+    conn = get_conn()
+    cursor = get_cursor(conn)
+
+    try:
+        cursor.execute(sql.TRIGGER_DOWNLOAD)
+        cursor.execute(sql.TRIGGER_AVG_RATE)
+        return 0
+    except Exception as e:
+        print(e, 'create trigger error')
+        return -1
+    finally:
+        conn.commit()
+        close_all(conn, cursor)
+
+
 if __name__ == '__main__':
     init()
-    # create_tables()
+    create_tables()
+    create_triggers()
     insert_tuples()
 
