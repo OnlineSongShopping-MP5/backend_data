@@ -82,11 +82,11 @@ CREATE_FAVORITE_SINGER_TABLE = """
 CREATE_ORDER_TABLE = """
     create table ORDERS (
         customer varchar2(20) references CUSTOMER(username) on delete cascade,
-        order_id number,
+        order_id varchar2(100),
         song_id varchar2(50) references SONG(id) on delete cascade,
         time timestamp not null,
         price number(3,2) not null,
-        paid number(1) not null check (paid = 0 or paid = 1),
+        paid number(1) default 0 not null check (paid = 0 or paid = 1),
         primary key(order_id)
     )
 """

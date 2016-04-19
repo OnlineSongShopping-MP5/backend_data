@@ -10,8 +10,8 @@ from datetime import datetime
 dataName = 'msd_summary_file.h5'
 dataPath = '../' + dataName
 
-USER_NAME = 'yw0'
-PASSWD = 'DBdb1234'
+USER_NAME = 'zjia'
+PASSWD = '1A2b3c4d!!'
 HOST = 'oracle.cise.ufl.edu'
 PORT = '1521'
 SID = 'orcl'
@@ -509,8 +509,8 @@ def insert_order():
         for i in range(hard.NUM_ORDER):
             index_song = InfoGenerator.gen_int(0, len(songs) - 1)
             __customer = customers[InfoGenerator.gen_int(0, len(customers) - 1)].get_username()
-            __order_id = i
             __song_id = songs[index_song].get_id()
+            __order_id = __customer + __song_id
             __price = songs[index_song].get_price()
             __time = datetime.now()
             __paid = 0
@@ -644,6 +644,6 @@ def insert_tuples():
 
 if __name__ == '__main__':
     init()
-    create_tables()
+    # create_tables()
     insert_tuples()
 
