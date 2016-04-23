@@ -197,7 +197,7 @@ TRIGGER_AVG_RATE = """
 """
 
 
-"""PROCEDURE"""
+""" PROCEDURE """
 PROCEDURE_INSERT_CART = """
     create or replace procedure insertOrder (customer in varchar2, song_id in varchar2, orderid in varchar2)
     as
