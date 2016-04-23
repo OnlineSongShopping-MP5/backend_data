@@ -206,3 +206,4 @@ PROCEDURE_INSERT_CART = """
      select price into s_price from song where song.id = song_id;
      insert into orders values(customer, orderid, song_id, systimestamp, s_price, 0);
     end;
+"""
