@@ -195,3 +195,14 @@ TRIGGER_AVG_RATE = """
       end if;
     end;
 """
+
+
+"""PROCEDURE"""
+PROCEDURE_INSERT_CART = """
+    create or replace procedure insertOrder (customer in varchar2, song_id in varchar2, orderid in varchar2)
+    as
+     s_price number(3, 2);
+    begin
+     select price into s_price from song where song.id = song_id;
+     insert into orders values(customer, orderid, song_id, systimestamp, s_price, 0);
+    end;
